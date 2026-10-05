@@ -1,18 +1,19 @@
 # 当前状态快照
-> 更新于：2026-10-05 16:35 +08:00
+> 更新于：2026-10-05 16:45 +08:00
 
-**阶段**：v2 计划生效；T03 已验收通过（ACCEPTED），T01 执行中，T04 待派发。
+**阶段**：v2 计划生效；T01/T03 已验收（ACCEPTED），T02/T04 执行中。
 
 **进行中**：
-- T01：YADE 应力映射与 Hill-Mandel 验证（worker 执行中）
+- T02：DEM 超弹性/各向同性/代表性门禁（worker 执行中）
+- T04：DoE + PANN 训练（worker 执行中）
 
 **子任务流转跟踪**：
 | 任务 ID | 简要目标 | 专项角色 | 负责人 | 状态 | 依赖 | 派发单路径 | 交付物/交接件 |
 | :--- | :--- | :--- | :---: | :--- | :--- | :--- | :--- |
-| T01 | Phase 0 G1a/G1b：getStress→S 映射 + Hill-Mandel | Experiment Engineer (DEM) | worker-t01-w1 | DISPATCHED | — | `for_manager/T01/dispatch.md` | 待交接 |
-| T02 | Phase 0 G1c/G2：DEM 超弹性/各向同性/代表性门禁 | Experiment Engineer (DEM) | — | PLANNED | T01 | 待派发 | — |
+| T01 | Phase 0 G1a/G1b：getStress→S 映射 + Hill-Mandel | Experiment Engineer (DEM) | worker-t01-w1 | ACCEPTED | — | `for_manager/T01/dispatch.md` | `rve/homogenize.py` + `rve/tests/` + `for_manager/T01/w1/review.md` |
+| T02 | Phase 0 G1c/G2：DEM 超弹性/各向同性/代表性门禁 | Experiment Engineer (DEM) | worker-t02-w1 | DISPATCHED | T01 | `for_manager/T02/dispatch.md` | 待交接 |
 | T03 | Phase 1A-1：Eq.(33) 精确实现 + 一致性测试 | Experiment Engineer | worker-t03-w1 | ACCEPTED | — | `for_manager/T03/dispatch.md` | `examples/ex1_neohooke/` + `for_manager/T03/w1/review.md` |
-| T04 | Phase 1A-2/3：PANN + DoE + 训练（测试 L2<5%） | Experiment Engineer | — | DISPATCHED | T03 | `for_manager/T04/dispatch.md` | 待交接 |
+| T04 | Phase 1A-2/3：PANN + DoE + 训练（测试 L2<5%） | Experiment Engineer | worker-t04-w1 | DISPATCHED | T03 | `for_manager/T04/dispatch.md` | 待交接 |
 | T05 | Phase 1A-4：UQ demo（MC q99 + 区间） | Experiment Engineer | — | PLANNED | T04 | 待派发 | — |
 
 **待办**（按优先级）：

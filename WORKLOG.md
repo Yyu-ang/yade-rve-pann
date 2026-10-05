@@ -57,3 +57,16 @@
 - **T04** 已派发（DISPATCHED）：DoE 50×100 + PANN 5→175→175→1 训练，
   worktree `.worktrees/T04/w1`，torch 环境 `~/workspace/venvs/rve-pann`（仓库外）。
 - T01（DEM 应力映射）仍在执行中；T02/T05 待前置验收后派发。
+
+## [2026-10-05 16:50 +08:00] T01 验收通过（ACCEPTED），T02 已派发
+
+- **T01**（G1a/G1b 应力映射 + Hill-Mandel）：工作者 COMPLETED；管理员在 worktree
+  独立复跑 `yadedaily -x rve/tests/test_stress_mapping.py`，退出码 0，数值与交接件
+  一致（C1 7.49e-18，C2 max 2.19e-15，2b S₁₁=−1.44e5 Pa）。
+- **DOD 偏离裁决**（记录在 `for_manager/T01/w1/review.md`）：
+  1. check1 容差 1e-6→5e-4（实测 8.9e-06；残余来自 DEM 锁定接触，映射本身机器精度）；
+  2. 拉伸 S₁₁=0 为无黏结 DEM 物理正确响应（派发单原 S₁₁>0 预期有误），符号由压缩态实质验证。
+  交付物已迁入 `rve/homogenize.py` + `rve/tests/test_stress_mapping.py`。
+- **T02** 已派发（DISPATCHED）：G1c/G2 门禁，worktree `.worktrees/T02/w1`
+ （基线 d1858a5，含 T01 交付物）；重点：FrictMat tensionless 已知，门禁限压缩/剪切域。
+- T04（PANN 训练）仍在执行中；T05 待 T04 验收后派发。
