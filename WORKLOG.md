@@ -153,3 +153,15 @@
 - **Phase 1A（分析轨道）至此全部完成**：Eq.(33) 精确实现 → DoE → PANN →
   材料级 UQ demo，全部 DOD 通过且无一放宽。
 - 待用户决策：DEM 轨道后续（记为阴性结果关闭 vs 带历史变量的 surrogate）。
+
+## [2026-10-05 18:15 +08:00] 用户决策：DEM 轨道记为阴性结果关闭
+
+- **决策**：用户选择"DEM 轨道记为阴性结果，关闭"；不启动带历史变量的 surrogate（声明超论文方法）。
+- **证据链**（全部独立复验、容差从未放宽）：
+  - FrictMat（T02）：G1c 耗散 25% > 10% NO-GO；G2b Δ=4.93% > 0.5% NO-GO。
+  - bonded CohFrictMat（T02b）：零断键、零摩擦耗散，但耗散仍 16% > 10% NO-GO；
+    根因=有限应变接触拓扑回滞（压缩新生 ~640 个未粘接接触，卸载后 ~55 个滞留自应力）；
+    G2b Δ=3.62% > 0.5% NO-GO。
+- **文档归档**：`docs/method_notes.md` 新增 §Phase 0 negative result（门禁表+机制+诚实报告说明）；
+  `PROJECT_DASHBOARD.md` 与 `current_status.md` 更新；checkpoint 与门禁基础设施留库。
+- **DEM worktrees**（T01/T02/T02b，已合并 main）待清理；历史变量 surrogate 留待用户另行立项。

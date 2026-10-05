@@ -78,3 +78,41 @@ mechanical domain H_ij ∈ [−0.2, 0.2]; DoE 50 × 100; PANN 5→175→175→1.
 | domain-separated LHS | `sampling/domain_separation.py` |
 | PANN Ψ(**I**,**u**) | `surrogate/pann.py` (PyTorch, autodiff stress) |
 | MC / interval / p-box | `uq/` |
+
+## Phase 0 negative result — DEM track CLOSED (2026-10-05, user decision)
+
+**Question**: can a YADE DEM periodic cell (1000-particle bidisperse packing,
+`E_soft=1e7 Pa`) serve as the microscale model under the paper's energy-PANN
+ansatz (single-valued Ψ(**C**,**u**), hyperelastic premise)?
+
+**Answer: NO** — for both contact models tested, with un-relaxed tolerances.
+Evidence (all independently re-run by maintainer; scripts in `rve/tests/`):
+
+| gate | FrictMat (T02) | bonded CohFrictMat (T02b) | DOD |
+|---|---|---|---|
+| G1a stress mapping | C1 rel 7.5e-18 (machine precision) | — (inherited) | <1e-6 ✓ |
+| G1b Hill–Mandel | max rel 2.2e-15 (machine precision) | — (inherited) | <1e-2 ✓ |
+| G1c load–unload closure | 7.89e-7 | 1.41e-3 | <1e-3: GO then **NO-GO** |
+| G1c dissipation ratio | **0.255** | **0.162** | <0.10: **NO-GO** both |
+| G1c path independence | 0.0349 | 0.0197 | <0.05 ✓ both |
+| G1c bond breakage | n/a | 0 | 0 ✓ |
+| G2a isotropy spread | 0.0070 | 0.0510 | <0.10 ✓ both |
+| G2b representativeness Δ | **4.93%** | **3.62%** | ≤0.5%: **NO-GO** both |
+
+**Physical mechanism** (diagnosed over multiple pilot/sweep runs):
+- FrictMat: 25% of external work dissipated by inter-particle frictional
+  sliding — incompatible with a single-valued strain energy.
+- Bonded (zero broken bonds, `frictDissip`=0): dissipation drops to 16% but
+  remains >10%. Residual comes from **finite-strain contact-topology
+  hysteresis**: ~640 new unbonded frictional contacts form during 10%
+  compression, ~55 stay stuck after unloading → self-stress state.
+  Intrinsic to DEM at finite strain; cohesion cannot remove it.
+- G2b: realization scatter at 1000 particles ≈ 7–10× the paper's FEM
+  criterion (0.5%) — RVE size effect, independent of contact model.
+
+**Honest reporting note**: this negative result is itself informative — it
+quantifies *why* the paper uses FEM RVEs and what a DEM adaptation would
+require (history-dependent surrogate, declared beyond-paper method).
+The analytical track (Phase 1A: Eq.(33) → PANN → UQ) is complete and
+unaffected. DEM gate infrastructure (`rve/generate.py`, `rve/convergence.py`,
+`rve/tests/test_gates.py`) is retained in-repo for reuse.
