@@ -26,6 +26,8 @@
 |--------|------|------|----------|
 | README | `README.md` | 仓库目标、方法摘要、运行说明及进度清单 | 远端基线；本次保留 |
 | 方法笔记 | `docs/method_notes.md` | 论文参数、采样与 YADE 映射摘要 | 远端基线；需按论文原文校核 |
+| 核心论文 PDF | `docs/references/Harazin_2026_CMAME_452_118726.pdf` | PANN 多尺度多态 UQ 复现的主要文献 | 2026-10-05 |
+| 文献索引 | `docs/references/README.md` | 论文引文、DOI 与 PDF 入口 | 2026-10-05 |
 | 复现计划 | `docs/reproduction_plan.md` | Phase 1–6 执行路线与分阶段验收标准 | 远端新增提交 `6d17aaf` |
 | 项目契约 | `AGENTS.md` | 多 AI 协作及项目维护规则 | 2026-10-05 |
 | 本地管理技能 | `.skill/academic-project/` | academic-project v2.4.2 固化副本及门禁 | 2026-10-05 |
