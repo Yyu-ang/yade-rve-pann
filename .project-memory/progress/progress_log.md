@@ -1,6 +1,12 @@
 # 工作进展日志
 > 最新在前；仅保留最近 30 条，更早条目移入 ../archive/progress_log_YYYYQn.md
 
+## [2026-10-05 15:51 +08:00] 推送并核验核心论文 PDF
+- **结果**：PDF 与引文索引随提交 `456e7e1495d7075bc1a912acce7e9912ecc0ea35` 推送至私有仓库 `main`。
+- **远端核验**：本地 HEAD、`git ls-remote` 与 GitHub API `main` ref 一致；远端 PDF 路径存在，大小 3,793,983 bytes，Git blob SHA 与本地一致。
+- **附带核验**：WORKLOG 两侧记录均在远端；`main` 不再跟踪 `.venv/`；本地工作树干净。
+- **下一步**：由后续开发者按 `docs/reproduction_plan.md` 从 Phase 1 解析 Example I 开始。
+
 ## [2026-10-05 15:42 +08:00] 纳入项目核心论文 PDF
 - **任务**：按用户追加要求，将 YADE-RVE-PANN 项目主文献收入仓库资料目录。
 - **完成**：复制到 `docs/references/Harazin_2026_CMAME_452_118726.pdf`，新增 DOI/引文索引；PDF 源与副本 SHA-256 一致，大小 3,793,983 bytes。

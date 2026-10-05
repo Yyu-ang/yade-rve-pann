@@ -12,8 +12,8 @@
 - **执行动作**：保留远端 README、方法说明及源码；按用户确认的 `code_experiment` 类型固化 `academic-project` v2.4.2，建立项目契约、状态看板、记忆骨架和协作目录；治理收口设为 `off`。
 - **验证证据**：本地 `project_preflight.py --json` 与 `project_finish_check.py --json` 均返回 `ok: true`；本地技能版本与项目版本均为 `2.4.2`；初始化创建 119 个文件，原有 `README.md` 未覆盖；远端快进后 `main` 与 `origin/main` 同指向 `6d17aafb6846ae5dec8b28d09d0c64eac6b255c9`。
 - **代码范围**：本次未修改算法源码，不运行数值实验；计算代码验证留给后续开发任务。
-- **发布状态**：首个管理结构提交 `6967e1cc9aed65fd220325c7b25c79fa2f600088` 已推送至 `main`；GitHub API 的 `main` ref 与 `git ls-remote` 一致，119 个提交路径均在远端树中，7 个关键文件的 Git blob SHA 与本地一致。当前追加核心论文 PDF，待随本次提交发布。
-- **下一步**：提交并推送 `docs/references/` 文献 PDF/索引及本次记录，核验远端文件 blob SHA 与尺寸；后续开发按 `docs/reproduction_plan.md` 从解析 Example I 开始。
+- **发布状态**：首个管理结构提交 `6967e1cc9aed65fd220325c7b25c79fa2f600088` 已推送并回读；核心论文提交 `456e7e1495d7075bc1a912acce7e9912ecc0ea35` 已基于远端清理提交推送至 `main`。GitHub API ref 与 `git ls-remote` 一致。
+- **下一步**：后续开发按 `docs/reproduction_plan.md` 从解析 Example I 开始。
 - **关联文件**：`AGENTS.md`、`PROJECT_DASHBOARD.md`、`.skill/academic-project/`、`.project-memory/`。
 
 ## [2026-10-05 15:42 +08:00] 纳入项目核心论文
@@ -22,12 +22,12 @@
 - **文献**：Harazin et al. (2026), *Multiscale polymorphic uncertainty quantification based on physics-augmented neural networks*, CMAME 452, 118726; DOI `10.1016/j.cma.2025.118726`。
 - **文件**：`docs/references/Harazin_2026_CMAME_452_118726.pdf`；索引：`docs/references/README.md`。
 - **完整性证据**：本地源与仓库副本均为 3,793,983 bytes，SHA-256 `f4238de5192db992f1905c845b45793ae999e789828325954a67e53262924916`；PDF 头为 `%PDF-1.7`。
-- **发布目标**：私有 GitHub 仓库 `Yyu-ang/yade-rve-pann` 的 `main`；将随本次提交推送并通过远端 Git blob SHA/文件尺寸读回核验。
-- **下一步**：保留远端 `747adf8` 的 `.venv/` 清理和 `.gitignore` 更新，完成分支同步后推送论文文件。
+- **发布目标**：私有 GitHub 仓库 `Yyu-ang/yade-rve-pann` 的 `main`；提交 `456e7e1495d7075bc1a912acce7e9912ecc0ea35` 已推送，远端 PDF Git blob SHA/文件尺寸已读回核验。
+- **下一步**：核心论文已推送并完成远端核验；后续开发按 `docs/reproduction_plan.md` 从 Phase 1 解析 Example I 开始。
 
 ## [2026-10-05 15:43 +08:00] 同步远端虚拟环境清理
 
 - **远端提交**：`747adf80719fe97efd192827d73049f8acba6609`，提交说明为移除误提交的 `.venv/`（519 个文件，约 1.1GB）并忽略该目录。
 - **执行结果**：已获用户授权整合该提交；保留远端 `.gitignore` 更新和 `.venv/` 删除，不回滚、不强推。
 - **冲突处理**：本地论文提交与远端仅在 `WORKLOG.md` 重叠；当前文件保留论文入库与远端环境清理两项记录。
-- **验证状态**：待完成 rebase、推送及远端 PDF blob/尺寸读回。
+- **验证状态**：已完成 rebase、推送与远端回读；`main` 与本地 `HEAD` 同为 `456e7e1495d7075bc1a912acce7e9912ecc0ea35`；论文 blob SHA 和文件尺寸匹配，本地工作树干净，远端 `.venv/` 跟踪数为 0。
