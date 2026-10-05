@@ -1,23 +1,26 @@
 # 当前状态快照
-> 更新于：2026-10-05 15:25 +08:00
+> 更新于：2026-10-05 16:35 +08:00
 
-**阶段**：学术项目管理结构与复现计划已就绪；Phase 1 解析算例实现待派工。
+**阶段**：v2 计划生效；T03 已验收通过（ACCEPTED），T01 执行中，T04 待派发。
 
 **进行中**：
-- 暂无已派发的开发子任务。
+- T01：YADE 应力映射与 Hill-Mandel 验证（worker 执行中）
 
 **子任务流转跟踪**：
 | 任务 ID | 简要目标 | 专项角色 | 负责人 | 状态 | 依赖 | 派发单路径 | 交付物/交接件 |
-| :--- | :--- | :--- | :--- | :---: | :--- | :--- | :--- |
-| — | 当前无活动派单 | — | — | — | — | — | — |
+| :--- | :--- | :--- | :---: | :--- | :--- | :--- | :--- |
+| T01 | Phase 0 G1a/G1b：getStress→S 映射 + Hill-Mandel | Experiment Engineer (DEM) | worker-t01-w1 | DISPATCHED | — | `for_manager/T01/dispatch.md` | 待交接 |
+| T02 | Phase 0 G1c/G2：DEM 超弹性/各向同性/代表性门禁 | Experiment Engineer (DEM) | — | PLANNED | T01 | 待派发 | — |
+| T03 | Phase 1A-1：Eq.(33) 精确实现 + 一致性测试 | Experiment Engineer | worker-t03-w1 | ACCEPTED | — | `for_manager/T03/dispatch.md` | `examples/ex1_neohooke/` + `for_manager/T03/w1/review.md` |
+| T04 | Phase 1A-2/3：PANN + DoE + 训练（测试 L2<5%） | Experiment Engineer | — | DISPATCHED | T03 | `for_manager/T04/dispatch.md` | 待交接 |
+| T05 | Phase 1A-4：UQ demo（MC q99 + 区间） | Experiment Engineer | — | PLANNED | T04 | 待派发 | — |
 
 **待办**（按优先级）：
-1. [ ] Phase 1：按 `docs/reproduction_plan.md` 先实现解析 Neo-Hooke Example I，验证解析应力、PANN 应力误差 <5% 和 q99 相对误差 <1%（均为计划门槛）。
-2. [ ] Phase 2：实现 YADE DEM 周期 RVE，应力测度转换经核验后检查 Δ ≤0.5% 的收敛性；不与论文 FEM 数值对标。
-3. [ ] 后续按 Phase 3–6 推进域分离采样、PANN、UQ 与报告；对照 README Quick start 补齐或修正缺失入口。
+1. [ ] 验收 T01/T03（独立复测 DOD），ACCEPTED 后派发 T02/T04。
+2. [ ] T02 出 GO/NO-GO 门禁 verdict；若 NO-GO，启动 bonded-contact 备选评估。
+3. [ ] T04/T05 完成后进入 Phase 2（DEM RVE 适配）与报告。
+4. [ ] torch 环境已重建于 `~/workspace/venvs/rve-pann`（仓库外），供 T04 使用。
 
 **阻塞/风险**：
-- 论文基于 FEM，本仓库计划采用 YADE DEM；该适配的物理建模差异与应力映射需要验证，不应将 DEM 结果直接称为原论文的严格复现。
-- 本次未运行 YADE 或算法测试。抽查源码发现 `rve/generate.py` 与 `surrogate/pann.py` 含 `NotImplementedError`；README 引用的 `surrogate/train_pann.py`、`uq/run_uq.py` 与 `examples/ex1_neohooke/` 在当前基线不存在，后续须补齐或修正文档再宣称可运行。`docs/reproduction_plan.md` 提供分阶段方案：先做解析 Example I，再进入 DEM RVE；这是计划，不是已执行结果。
-
-**下一步建议**：由用户安排后续 AI；先读 `AGENTS.md`、`README.md`、`docs/method_notes.md`、`docs/reproduction_plan.md` 及本目录方案，从 Phase 1 最小解析验证开始。
+- 2 核 + 内存紧张：DEM 任务（T01/T02）与重任务串行，前台只并行轻量 numpy 任务（T03）。
+- 论文基于 FEM，本仓库 DEM 适配须过 Phase 0 门禁；DEM 数值不与论文 FEM 对标（design.md 已定）。

@@ -46,3 +46,14 @@
   - `docs/method_notes.md`：补 Eq.(33) 精确式、Δ 原式+页码+不一致分析、论文三限制。
   - `docs/reproduction_plan.md`：标注 SUPERSEDED。
 - **验证**：门禁脚本见下；未运行数值代码（无算法变更）。
+
+## [2026-10-05 16:40 +08:00] T03 验收通过（ACCEPTED），T04 已派发
+
+- **T03**（Eq.(33) 精确实现 + 一致性测试）：工作者交接 `for_manager/T03/w1/handoff.md`
+  为 COMPLETED；管理员独立复测 `python3 examples/ex1_neohooke/test_neohooke.py`
+  退出码 0，四项全 PASS（[3] 1.368e-08 < 1e-6，[4] S₁₁=5246.7 MPa）；
+  抽查 `neohooke.py` 与 PDF p.11 原式逐项一致。裁决 ACCEPTED，
+  见 `for_manager/T03/w1/review.md`；交付物已迁入 `examples/ex1_neohooke/`。
+- **T04** 已派发（DISPATCHED）：DoE 50×100 + PANN 5→175→175→1 训练，
+  worktree `.worktrees/T04/w1`，torch 环境 `~/workspace/venvs/rve-pann`（仓库外）。
+- T01（DEM 应力映射）仍在执行中；T02/T05 待前置验收后派发。
