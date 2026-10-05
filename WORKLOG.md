@@ -70,3 +70,18 @@
 - **T02** 已派发（DISPATCHED）：G1c/G2 门禁，worktree `.worktrees/T02/w1`
  （基线 d1858a5，含 T01 交付物）；重点：FrictMat tensionless 已知，门禁限压缩/剪切域。
 - T04（PANN 训练）仍在执行中；T05 待 T04 验收后派发。
+
+## [2026-10-05 17:05 +08:00] T02 验收通过（ACCEPTED），Phase 0 判 NO-GO
+
+- **T02**（G1c/G2 门禁）：工作者 COMPLETED；管理员在 worktree 独立复跑
+  `yadedaily -x rve/tests/test_gates.py`，退出码 0，门禁表数值与交接件逐项一致。
+- **门禁 verdict**：G1c 闭合 7.89e-7 GO / 耗散 0.255 NO-GO / 路径无关 0.0349 GO；
+  G2a 各向同性 0.0070 GO；G2b 代表性 Δ=4.9309% NO-GO（≤0.5%）。
+- **结论**：FrictMat DEM 不满足 energy-PANN 超弹性前提（摩擦耗散 25%），
+  且 1000 颗粒下 realization scatter 约为论文判据 10 倍（尺寸效应）。
+  容差未放宽。交付物已迁入 `rve/generate.py`、`rve/convergence.py`、
+  `rve/tests/test_gates.py`。
+- **已知潜在 bug**（未修，非本次授权范围）：`rve/homogenize.py::probe_F`
+  从参考 hSize 插值，非参考态调用会突变；T02 用自带修正版绕过。
+- DEM 轨道后续（bonded 重测 vs 关闭为阴性结果）待用户决策；
+  分析轨道 T04（PANN 训练）继续执行中，T05 待派发。
