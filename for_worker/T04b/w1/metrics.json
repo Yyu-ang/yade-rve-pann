@@ -1,0 +1,19 @@
+{
+  "seed": 42,
+  "n_train": 7400,
+  "n_test": 500,
+  "n_doe": 7900,
+  "hidden": [
+    175,
+    175
+  ],
+  "lr": 0.001,
+  "batch": 256,
+  "epochs": 2000,
+  "train_time_s": 670.9,
+  "train_loss_tail": 1.2956000810373943e-05,
+  "test_rel_l2": 0.0045160465043355994,
+  "train_rel_l2": 0.00373416067033314,
+  "strategy": "T04b boundary-band augmentation (train-only)",
+  "n_boundary": 2900
+}

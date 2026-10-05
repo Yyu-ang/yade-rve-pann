@@ -137,3 +137,19 @@
   `rve/generate.py`（bonded 变体）、`rve/tests/test_gates.py`。
 - DEM 轨道后续（历史变量 surrogate vs 记为阴性结果关闭）待用户决策。
 - T04b（边界加权再训练）仍在执行中。
+
+## [2026-10-05 18:05 +08:00] T04b/T05 验收通过（ACCEPTED），Phase 1A 完成
+
+- **T04b**（边界加权再训练）：工作者 COMPLETED；管理员独立复跑自测（~11 分钟），
+  退出码 0，数值逐位一致：测试集相对 L2=**0.4516%**（T04 为 1.51%，无回归且更优）；
+  四角点 0.2021%/1.8823%/1.5035%/**1.1319%** 全<3%（问题角点原 −5.56%）。
+  策略诚实：DoE 边界增补 2900 点只进训练集，测试集与 T04 逐位一致，单阶段同超参。
+  交付物已迁入 `surrogate/train_pann.py` + `surrogate/tests/test_pann.py`；
+  `pann_v2.pt` 留沙盒（不进 git）。
+- **T05**（材料级 UQ demo）：CKPT 改指 `pann_v2.pt` 后重验，DOD 全过：
+  MC mean 0.56% / std 0.02% / q99 0.55%；区间 min 0.20% / max **1.13%**（<3%）。
+  交付物已迁入 `uq/material_uq.py` + `uq/tests/test_uq.py`（main 上复测通过）。
+  复核件 `for_manager/T05/w1/review.md` 由 HANDOFF_ACCEPTED 追认为 ACCEPTED。
+- **Phase 1A（分析轨道）至此全部完成**：Eq.(33) 精确实现 → DoE → PANN →
+  材料级 UQ demo，全部 DOD 通过且无一放宽。
+- 待用户决策：DEM 轨道后续（记为阴性结果关闭 vs 带历史变量的 surrogate）。

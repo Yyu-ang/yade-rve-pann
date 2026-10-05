@@ -1,7 +1,7 @@
 # Manager Review — T05
 task_id: "T05"
 worker_id: "w1"
-verdict: HANDOFF_ACCEPTED
+verdict: ACCEPTED
 reviewed_at: "2026-10-05"
 reviewer_role: maintainer
 
@@ -18,9 +18,16 @@ reviewer_role: maintainer
 - T05 方法链本身已验证正确：CRN 的 MC、L-BFGS 多起点经
   differential_evolution 独立交叉确认、向量化 Eq.(33) 与 T03 交叉 0.0 误差。
 
-## 裁决：HANDOFF_ACCEPTED（非工作者过错，不返工 T05）
-- 交付物（`uq/material_uq.py`、`uq/tests/test_uq.py`）保留在 worktree，
-  待 T04b 修复角点后重验区间 max。
-- **不放宽 DOD**：<3% 维持；走根因修复而非事后放宽。
-- 下游：派发 T04b（边界加权再训练），其验收后重跑 T05 自测。
-- 工作者分支 `worker/T05-w1` 与 WIP（`for_worker/T05/w1/`）保留。
+## 追认验收（T04b 完成后）
+- T04b ACCEPTED 后，管理员将 `uq/material_uq.py` 的 CKPT 改指
+  `for_worker/T04b/w1/pann_v2.pt`（T05 worktree 内），重跑自测：
+  MC mean 0.5643% / std 0.0227% / q99 0.5513% ✓；
+  区间 min 0.2021% ✓；区间 max **1.1319%** ✓（<3%）。
+  `DOD (<3% all): PASS`，`ALL UQ CHECKS PASSED`，退出码 0。
+- 数值与 T04b 工作者的 reverify 一致。
+
+## 最终裁决：ACCEPTED
+- 交付物迁入正式路径：`uq/material_uq.py`、`uq/tests/test_uq.py`
+  （CKPT 指向 pann_v2.pt）。
+- DOD 第 4 项声明已包含：材料点级 demo，不声称论文宏观 BVP 的 q99 精度。
+- 工作者分支 `worker/T05-w1` 保留备查。
