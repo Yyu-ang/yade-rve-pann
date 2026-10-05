@@ -1,5 +1,9 @@
 # 复现计划 — Harazin et al., CMAME 452 (2026) 118726
 
+> ⚠️ **SUPERSEDED** — 本计划（v1）已被 `docs/reproduction_plan_review_2026-10-05.md`（v2）
+> 取代。v2 采纳了 GPT 审查意见并经 PDF 视觉核验，新增 Phase 0 门禁、修正 Eq.(33)、
+> 修正 Δ 定义、拆分 Phase 1A/1B。本文件仅保留作历史记录。
+
 > Multiscale polymorphic uncertainty quantification based on physics-augmented neural networks
 
 本文档是复现工作的执行计划。方法细节见 `docs/method_notes.md`。

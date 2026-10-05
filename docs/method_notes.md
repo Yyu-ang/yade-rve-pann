@@ -15,12 +15,39 @@
 
 - 50 LHS samples in **U** (uncertain-parameter space); per sample: generate RVE,
   convergence test.
-- Convergence: prescribe **F** = **1** + **H**, H_ij = 0.1; 1000 mechanical samples;
-  criterion Δ = std(‖**S**‖)/mean(‖**S**‖) ≤ 0.5%.
-- 1000 LHS samples in **F** per RVE → 50 × 1000 = 50,000 (I, u, S) tuples.
+- Convergence test: fixed prescribed **F** = **1** + **H**, H_ij = 0.1, over
+  multiple realizations / VE sizes (NOT the 1000 mechanical LHS below).
+- Convergence criterion — ⚠️ paper typesetting vs figure inconsistency, visually
+  verified from PDF p.14 (see `docs/reproduction_plan_review_2026-10-05.md` §1.2):
+  typeset as Δ = (E(‖**S̄**‖) − √(VAR(‖**S̄**‖)))/E(‖**S̄**‖) [%], Δ ≤ 0.5%,
+  but Fig.10(b) ("Δ × 10¹" ≈ 0.9–1.3) and the criterion are only consistent with
+  the coefficient of variation. **Adopted operative definition:**
+  Δ = std(‖**S̄**‖)/mean(‖**S̄**‖) [%] ≤ 0.5%. Recorded as known transcription risk.
+- 1000 LHS samples in **F** per converged RVE → 50 × 1000 = 50,000 (I, u, S) tuples.
   Paper cost: ~43 CPU hours (FEM RVE, i5-10400).
 - Mechanical domain: H entries in [−0.2, 0.2], **F** = **H** + **1**.
 - All inputs scaled to [−1, 1]; chain rule applied to Eqs. (6)/(13).
+
+## Example I reference law — Eq.(33), §5.1 (visually verified, PDF p.11)
+
+Modified Neo-Hookean (must be implemented exactly; NOT Simo–Taylor):
+
+    S = F⁻¹ · ( κ·ln[J]·F⁻ᵀ + η·( J^(−2/3)·F − tr(J^(−2/3)·C)/3 · F⁻ᵀ ) )
+    κ = E/(3·(1−2ν)),  η = E/(2·(1+ν))
+
+i.e. **P** = ∂Ψ/∂**F** for Ψ = κ/2·(lnJ)² + η/2·(Ī₁−3), then **S** = **F**⁻¹·**P**.
+Uncertain inputs (Table 1): E ∈ [2.5, 3.5]×10⁴ MPa (β=2.8e-3), ν ∈ [0.21, 0.39];
+mechanical domain H_ij ∈ [−0.2, 0.2]; DoE 50 × 100; PANN 5→175→175→1.
+
+## Paper scope limitations (for honest reporting)
+
+- Hyperelasticity assumed throughout (§2.3); PANN structure requires it.
+- Invariant form Ψ(**I**,**u**) requires material symmetry known a priori and
+  stable over **u** (§4.2.1, Conclusion).
+- Non-converged / stochastic VEs → stochastic energy response: explicitly out
+  of the method's current capability (Conclusion).
+- Example II has no feasible full-FE² reference solution; it demonstrates the
+  framework, not a benchmark for numerical comparison.
 
 ## PANN (§2.5, §4.2.1)
 

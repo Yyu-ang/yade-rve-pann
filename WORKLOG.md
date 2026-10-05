@@ -31,3 +31,18 @@
 - **执行结果**：已获用户授权整合该提交；保留远端 `.gitignore` 更新和 `.venv/` 删除，不回滚、不强推。
 - **冲突处理**：本地论文提交与远端仅在 `WORKLOG.md` 重叠；当前文件保留论文入库与远端环境清理两项记录。
 - **验证状态**：已完成 rebase、推送与远端回读；`main` 与本地 `HEAD` 同为 `456e7e1495d7075bc1a912acce7e9912ecc0ea35`；论文 blob SHA 和文件尺寸匹配，本地工作树干净，远端 `.venv/` 跟踪数为 0。
+
+## [2026-10-05 16:20 +08:00] 评审 GPT 审查意见并迭代复现计划 v2
+
+- **输入**：用户推送的 `docs/reproduction_plan_review_2026-10-05.md`（GPT 审查，REWORK REQUIRED）。
+- **核验动作**（P0-1/P0-6 要求视觉核验）：
+  - `pdftoppm` 渲染论文 PDF p.11/p.14 为 200/400dpi 图像，人工读图。
+  - Eq.(33) 确认：S = F⁻¹·(κ·lnJ·F⁻ᵀ + η·(J^(−2/3)·F − tr(J^(−2/3)·C)/3·F⁻ᵀ))，κ=E/(3(1−2ν))，η=E/(2(1+ν))；v1 的 Simo–Taylor 形式确非论文式，审查 P0-1 成立。
+  - Δ 公式确认：排版为 Δ=(E(‖S̄‖)−√(VAR(‖S̄‖)))/E(‖S̄‖)，按字面 ≈100%，与"Δ≤0.5%"及 Fig.10(b)（Δ×10¹≈0.9–1.3）矛盾；判定为排版疑似错误，采用 figure-consistent 的变异系数定义 Δ=std/mean，已记录为转录风险。
+- **评估结论**：P0-1..P0-6、P1-1..P1-5 全部成立，已逐条采纳；补充 bonded-contact 备选路径。
+- **产出**：
+  - 新计划 `docs/reproduction_plan_review_2026-10-05.md`（v2）：Phase 0 门禁（G0–G2）、Phase 1A/1B 拆分、硬门槛矩阵 G0–G6、接口修正、声明收窄。
+  - 审查原文 `git mv` → `docs/reviews/gpt_review_2026-10-05.md`（保留记录）。
+  - `docs/method_notes.md`：补 Eq.(33) 精确式、Δ 原式+页码+不一致分析、论文三限制。
+  - `docs/reproduction_plan.md`：标注 SUPERSEDED。
+- **验证**：门禁脚本见下；未运行数值代码（无算法变更）。
