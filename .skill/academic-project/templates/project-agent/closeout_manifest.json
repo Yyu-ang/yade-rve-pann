@@ -1,0 +1,38 @@
+{
+  "schema": "academic-project-closeout/v1",
+  "workers_quiesced": false,
+  "manager_summary": "[填写最终交付范围、核验结论及未遗留事项]",
+  "worker_statuses": [
+    {
+      "task_id": "[task-id]",
+      "worker_id": "[agent-id]",
+      "worker_status": "COMPLETED",
+      "manager_status": "ACCEPTED",
+      "handoff_source": "for_manager/[task-id]/[agent-id]/handoff.md",
+      "review_source": "for_manager/[task-id]/[agent-id]/review.md"
+    }
+  ],
+  "deliverables": [
+    {
+      "task_id": "[task-id]",
+      "worker_id": "[agent-id]",
+      "owner_role": "worker",
+      "source": "for_user/[final-artifact]",
+      "destination": "08_交付/[final-artifact]",
+      "verification": "[填写管理员实际核验方法与结果]"
+    }
+  ],
+  "handoffs": [
+    {
+      "source": "for_manager/[task-id]/[agent-id]/handoff.md",
+      "destination": ".project-memory/archive/agent-handoffs/[task-id]/[agent-id]/handoff.md"
+    },
+    {
+      "source": "for_manager/[task-id]/[agent-id]/review.md",
+      "destination": ".project-memory/archive/agent-handoffs/[task-id]/[agent-id]/review.md"
+    }
+  ],
+  "work_archive": [],
+  "work_discard": [],
+  "user_discard": []
+}

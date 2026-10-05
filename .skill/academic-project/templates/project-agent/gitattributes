@@ -1,0 +1,12 @@
+# 导出忽略规则：使用 git archive 归档或发布时，自动剥离 AI 内部记忆与项目脚手架
+# 模式一律以 / 锚定仓库根目录，避免误伤嵌套的同名文件（如技能模板目录内的 AGENTS.md）
+/.project-memory/ export-ignore
+/.paper-memory/ export-ignore
+/.skill/ export-ignore
+/.worktrees/ export-ignore
+/AGENTS.md export-ignore
+/WORKLOG.md export-ignore
+/PROJECT_DASHBOARD.md export-ignore
+/for_user/ export-ignore
+/for_worker/ export-ignore
+/for_manager/ export-ignore

@@ -1,0 +1,10 @@
+{
+  "skill": "<技能名>",
+  "version": 0,
+  "iteration": 0,
+  "gate_status": "gate_pending | passing | rejected",
+  "best_score": null,
+  "last_trace": "raw/traces/iter_0/",
+  "last_proposal": null,
+  "updated": "YYYY-MM-DD HH:mm"
+}
