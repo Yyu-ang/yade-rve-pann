@@ -6,7 +6,7 @@
 
 **进行中**：
 - T02b：bonded（CohFrictMat）重测 G1c（worker 执行中）
-- T04：DoE + PANN 训练（worker 执行中）
+- T05：材料级 UQ demo（worker 执行中）
 
 **子任务流转跟踪**：
 | 任务 ID | 简要目标 | 专项角色 | 负责人 | 状态 | 依赖 | 派发单路径 | 交付物/交接件 |
@@ -14,9 +14,9 @@
 | T01 | Phase 0 G1a/G1b：getStress→S 映射 + Hill-Mandel | Experiment Engineer (DEM) | worker-t01-w1 | ACCEPTED | — | `for_manager/T01/dispatch.md` | `rve/homogenize.py` + `rve/tests/` + `for_manager/T01/w1/review.md` |
 | T02 | Phase 0 G1c/G2：DEM 门禁（FrictMat 判 NO-GO） | Experiment Engineer (DEM) | worker-t02-w1 | ACCEPTED | T01 | `for_manager/T02/dispatch.md` | `rve/generate.py` + `rve/convergence.py` + `rve/tests/test_gates.py` + `for_manager/T02/w1/review.md` |
 | T03 | Phase 1A-1：Eq.(33) 精确实现 + 一致性测试 | Experiment Engineer | worker-t03-w1 | ACCEPTED | — | `for_manager/T03/dispatch.md` | `examples/ex1_neohooke/` + `for_manager/T03/w1/review.md` |
-| T04 | Phase 1A-2/3：PANN + DoE + 训练（测试 L2<5%） | Experiment Engineer | worker-t04-w1 | DISPATCHED | T03 | `for_manager/T04/dispatch.md` | 待交接 |
+| T04 | Phase 1A-2/3：PANN + DoE + 训练（测试 L2=1.51%<5%） | Experiment Engineer | worker-t04-w1 | ACCEPTED | T03 | `for_manager/T04/dispatch.md` | `surrogate/pann.py` + `surrogate/train_pann.py` + `surrogate/tests/` + `for_manager/T04/w1/review.md` |
 | T02b | Phase 0 fallback：bonded（CohFrictMat）重测 G1c | Experiment Engineer (DEM) | worker-t02b-w1 | DISPATCHED | T02 | `for_manager/T02b/dispatch.md` | 待交接 |
-| T05 | Phase 1A-4：UQ demo（MC q99 + 区间） | Experiment Engineer | — | PLANNED | T04 | 待派发 | — |
+| T05 | Phase 1A-4：UQ demo（MC q99 + 区间） | Experiment Engineer | worker-t05-w1 | DISPATCHED | T04 | `for_manager/T05/dispatch.md` | 待交接 |
 
 **待办**（按优先级）：
 1. [ ] 验收 T01/T03（独立复测 DOD），ACCEPTED 后派发 T02/T04。

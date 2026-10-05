@@ -95,3 +95,17 @@
   ③ 复用门禁脚本重测 G1c（耗散比<10% 主判据）+ 断键计数；
   ④ G2a/G2b 信息性复测（G2b 在 1000 颗粒下预期仍超标，如实报告）。
 - T04（PANN 训练）继续执行中。
+
+## [2026-10-05 17:20 +08:00] T04 验收通过（ACCEPTED），T05 已派发
+
+- **T04**（DoE + PANN 训练）：工作者 COMPLETED；管理员在 worktree 独立复跑
+  自测（~12 分钟），退出码 0，数值与交接件逐位一致（seed=42 确定性复现）：
+  DoE 5000 点（4500/500）；loss 1.42e-03→2.93e-05；
+  **测试集应力相对 L2 = 1.5144% < 5%** ✅；stress autograd-vs-FD ~3e-09；
+  tangent 对称性 ~1e-16，dS=ℂ:dE 的 FD 验证 4.4e-10。
+- 抽查 `surrogate/pann.py`：P0-4 接口、缩放进 autograd 图、5→175→175→1
+  softplus、tangent 对称化均正确。交付物已迁入 `surrogate/`；
+  checkpoint `for_worker/T04/w1/pann.pt` 留沙盒（不进 git），main 上验证可加载。
+- **T05** 已派发（DISPATCHED）：材料级 UQ demo（MC q99 + 区间优化），
+  worktree `.worktrees/T05/w1`，用沙盒 checkpoint；DOD 与解析 Eq.(33) 参考对比 <3%。
+- T02b（bonded 重测）仍在执行中。
