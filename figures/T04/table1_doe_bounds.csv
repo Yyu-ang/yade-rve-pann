@@ -1,0 +1,6 @@
+parameter,paper_lower,paper_upper,paper_confidence_beta,repo_lower,repo_upper,match,source
+E_iprf_MPa,2.5e4,3.5e4,2.8e-3,2.5e4,3.5e4,yes,surrogate/train_pann.py E_BOUNDS
+nu_rf,0.21,0.39,2.8e-3,0.21,0.39,yes,surrogate/train_pann.py NU_BOUNDS
+U_samples,50,,,50,,yes,surrogate/train_pann.py N_U
+F_samples_per_U,100,,,100,,yes,surrogate/train_pann.py N_F
+mech_range_H,[-0.2,0.2] per entry,,,[-0.2,0.2] per entry,,yes,surrogate/train_pann.py docstring

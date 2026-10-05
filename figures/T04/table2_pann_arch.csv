@@ -1,0 +1,6 @@
+layer,paper_neurons,paper_activation,repo_neurons,repo_activation,match,source
+Layer 1,5,softplus,5,softplus,yes,surrogate/pann.py (input dim 5 = C invariants + u)
+Layer 2,175,softplus,175,softplus,yes,surrogate/pann.py hidden=(175,175)
+Layer 3,175,softplus,175,softplus,yes,surrogate/pann.py hidden=(175,175)
+Layer 4,1,linear,1,linear,yes,surrogate/pann.py nn.Linear(d,1)
+test_stress_rel_L2,,<5% DOD,0.4516%,,pass,T04b acceptance (seed 42)

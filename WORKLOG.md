@@ -165,3 +165,17 @@
 - **文档归档**：`docs/method_notes.md` 新增 §Phase 0 negative result（门禁表+机制+诚实报告说明）；
   `PROJECT_DASHBOARD.md` 与 `current_status.md` 更新；checkpoint 与门禁基础设施留库。
 - **DEM worktrees**（T01/T02/T02b，已合并 main）待清理；历史变量 surrogate 留待用户另行立项。
+
+## [2026-10-05 18:40 +08:00] 用户约束：图表复现要求写入计划
+
+- **用户指令**：复现论文时尽可能复现论文中的图表结果，写入约束计划。
+- **执行**：
+  - 新建 `docs/figure_table_inventory.md`：论文 Fig. 1–11、Table 1–4 全清单，
+    标注类型（schematic/数据表/结果图）、对应任务、状态（已复现/analogue/待复现/豁免/范围外）。
+  - v2 计划新增 §7 图表复现约束：三件套交付（脚本+PNG/CSV+对照说明）、
+    schematic 豁免、analogue 标注义务、Fig. 7/11 的 p-box 声称仍被 Phase 1B（G6）锁定、
+    dispatch 必须引用图表编号。
+  - 已生成 `figures/T04/table1_doe_bounds.csv`、`figures/T04/table2_pann_arch.csv`
+    （论文值 vs 本仓库实现，逐值核对一致：E_BOUNDS=(2.5e4,3.5e4)、NU_BOUNDS=(0.21,0.39)、
+    pann.py 5→175→175→1 softplus）。
+- **待用户授权**：本次仅写文件，未提交/推送（契约 §4：提交推送须用户显式指示）。
