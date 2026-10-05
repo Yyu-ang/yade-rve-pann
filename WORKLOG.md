@@ -123,3 +123,17 @@
   DOD：测试 L2<5% 无回归 + 四角点<3% + T05 区间 max 重验<3%；
   若仍超标则如实记录局限。
 - T02b（bonded 重测）仍在执行中。
+
+## [2026-10-05 17:45 +08:00] T02b 验收通过（ACCEPTED），bonded fallback 判 NO-GO
+
+- **T02b**（bonded CohFrictMat 重测）：工作者 COMPLETED；管理员独立复跑
+  `yadedaily -x rve/tests/test_gates.py`，退出码 0，数值逐项一致：
+  G1c 闭合 1.41e-3（NO-GO，边缘超标）、耗散 0.162（NO-GO）、路径无关 0.0197（GO）、
+  断键 0（GO）；G2a 0.051（GO）；G2b Δ=3.62%（NO-GO，信息性）。
+- **物理结论**：bonded 消除了摩擦耗散与损伤，但有限应变接触拓扑回滞
+  （~640 新生无键接触、~55 卡住成自应力态）仍耗散 16%——DEM 内禀行为，
+  cohesion 无法消除。v2 计划 fallback 链已穷尽。
+- 交付物已迁入：`rve/homogenize.py`（probe_F 插值 bug 修复，T01 自测回归通过）、
+  `rve/generate.py`（bonded 变体）、`rve/tests/test_gates.py`。
+- DEM 轨道后续（历史变量 surrogate vs 记为阴性结果关闭）待用户决策。
+- T04b（边界加权再训练）仍在执行中。

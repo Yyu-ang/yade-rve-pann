@@ -12,6 +12,17 @@ materials ("DEM heterogeneous RVE analogue", not the paper's continuum RVE).
 FrictMat is cohesionless: tension S~0 is the physical response; gates are
 judged in the compression/shear domain only.
 
+Bonded variant (T02b): the same biphasic packing but with CohFrictMat
+contacts (normalCohesion/shearCohesion set via u["cohesion"], fragile=False
+so broken bonds persist as frictional contacts and stay countable through
+CohFrictPhys.cohesionBroken). Densification runs cohesion-free (frictional);
+once the packing is equilibrated at the reference state, cohesion is enabled
+on all existing contacts in place (setCohesionNow) and the bond topology is
+frozen -- new contacts formed under load stay frictional. Bonds eliminate
+inter-particle frictional sliding dissipation; the gate question is whether
+the bonded packing then satisfies the hyperelastic premise (G1c
+dissipation < 10%) with zero bond breakage in the 10% compression domain.
+
 T01 experience reused:
 - densify by affine cell scaling until ~1200 contacts, then STOP (deeper
   densification locks in large prestress);
@@ -26,6 +37,81 @@ import random
 
 E_SOFT_DEFAULT = 1e7
 E_STIFF_DEFAULT = 5e7
+COHESION_DEFAULT = 1e6  # N; ~150x the typical contact force at 10% compression
+
+
+BONDED_IDS = set()  # (id1,id2) sorted tuples of bonded contacts at build;
+# refreshed by anneal_reference_bonds() on every make_rve_packing() call.
+# Contacts formed later (e.g. during probing) are frictional, never bonded,
+# and must NOT be counted as broken bonds.
+
+
+def establish_reference_bonds(settle_steps=400, verbose=True):
+    """Enable cohesion on all current contacts at the reference state.
+
+    Called once after densification, when the packing is well equilibrated
+    (|mean stress|/E ~ 1e-4) at the reference cell (F=I). Uses the Ip2
+    functor's setCohesionNow to bond every *existing* contact in place --
+    no interaction is erased, so the equilibrated overlaps and geometry are
+    preserved (unlike an erase/re-form anneal, which relaxes the packing
+    and leaves a soft toe in the stress-strain response).
+
+    Afterwards new-bond creation stays disabled, so the bond network
+    topology is frozen at the reference state during probing: contacts
+    formed under load stay frictional, as in a real cemented granular
+    material. This removes the bond-formation history dependence that
+    otherwise dominates the hysteresis loop (new bonds' rest state would be
+    the deformed configuration).
+    """
+    from yade import O
+    ip2 = None
+    for e in O.engines:
+        if e.__class__.__name__ == "InteractionLoop":
+            for f in e.physDispatcher.functors:
+                if f.__class__.__name__ == "Ip2_CohFrictMat_CohFrictMat_CohFrictPhys":
+                    ip2 = f
+    if ip2 is None:
+        raise RuntimeError("CohFrict Ip2 functor not found in engines")
+    ip2.setCohesionNow = True
+    O.run(10, True)   # one pass: cohesion on all existing contacts
+    ip2.setCohesionNow = False
+    O.run(settle_steps, True)  # let moments/rotations settle with cohesion on
+    global BONDED_IDS
+    # reference bonded set = contacts still intact after the settle; a few
+    # weak bonds may break in the bonding transient itself and are excluded
+    # (they become frictional). The gate counts NEW breakage during probing.
+    BONDED_IDS = set(tuple(sorted((i.id1, i.id2))) for i in O.interactions
+                     if i.isReal
+                     and i.phys.__class__.__name__ == "CohFrictPhys"
+                     and not bool(i.phys.cohesionBroken))
+    n_bonded = len(BONDED_IDS)
+    n_broken = count_broken_bonds()  # 0 by construction here
+    if verbose:
+        print("[bonds] established on %d contacts, broken=%d; "
+              "new-bond creation stays disabled" % (n_bonded, n_broken),
+              flush=True)
+    return {"n_bonded": n_bonded, "n_broken": n_broken}
+
+
+def count_broken_bonds():
+    """Number of broken bonds among the reference-state bonded set.
+
+    Only contacts bonded by anneal_reference_bonds() (BONDED_IDS) are
+    considered: contacts formed later during probing are frictional by
+    construction (cohesionBroken defaults True) and must not be counted.
+    """
+    from yade import O
+    n = 0
+    for i in O.interactions:
+        if not i.isReal:
+            continue
+        if tuple(sorted((i.id1, i.id2))) not in BONDED_IDS:
+            continue
+        phys = i.phys
+        if (phys.__class__.__name__ == "CohFrictPhys"
+                and bool(phys.cohesionBroken)):
+            n += 1
+    return n
 
 
 def affine_scale_cell(s):
@@ -68,11 +154,11 @@ def make_rve_packing(cell_size=1.0, u=None, seed=0, n_spheres=1000,
     from yade import O, pack
     from yade.minieigenHP import Matrix3
     from yade.utils import PWaveTimeStep, unbalancedForce, getStress
-    from yade.wrapper import (FrictMat, ForceResetter, InsertionSortCollider,
+    from yade.wrapper import (CohFrictMat, ForceResetter, InsertionSortCollider,
                               Bo1_Sphere_Aabb, InteractionLoop,
-                              Ig2_Sphere_Sphere_ScGeom,
-                              Ip2_FrictMat_FrictMat_FrictPhys,
-                              Law2_ScGeom_FrictPhys_CundallStrack,
+                              Ig2_Sphere_Sphere_ScGeom6D,
+                              Ip2_CohFrictMat_CohFrictMat_CohFrictPhys,
+                              Law2_ScGeom6D_CohFrictPhys_CohesionMoment,
                               NewtonIntegrator)
     from rve.homogenize import set_reference_hsize
 
@@ -82,6 +168,7 @@ def make_rve_packing(cell_size=1.0, u=None, seed=0, n_spheres=1000,
     rRelFuzz = float(u.get("rRelFuzz", 0.3))
     E_soft = float(u.get("E_soft", E_SOFT_DEFAULT))
     E_stiff = float(u.get("E_stiff", E_STIFF_DEFAULT))
+    cohesion = float(u.get("cohesion", COHESION_DEFAULT))
     poisson = float(u.get("poisson", 0.3))
     frictionAngle = float(u.get("frictionAngle", 0.5))
     density = float(u.get("density", 2600))
@@ -89,10 +176,17 @@ def make_rve_packing(cell_size=1.0, u=None, seed=0, n_spheres=1000,
     O.reset()
     O.periodic = True
     O.cell.hSize = Matrix3(cell_size, 0, 0, 0, cell_size, 0, 0, 0, cell_size)
-    O.materials.append(FrictMat(young=E_soft, poisson=poisson,
-                                frictionAngle=frictionAngle, density=density))  # id 0
-    O.materials.append(FrictMat(young=E_stiff, poisson=poisson,
-                                frictionAngle=frictionAngle, density=density))  # id 1
+    # bonded contacts (T02b): fragile=False keeps broken bonds countable
+    O.materials.append(CohFrictMat(young=E_soft, poisson=poisson,
+                                   frictionAngle=frictionAngle, density=density,
+                                   normalCohesion=cohesion,
+                                   shearCohesion=cohesion,
+                                   fragile=False))  # id 0
+    O.materials.append(CohFrictMat(young=E_stiff, poisson=poisson,
+                                   frictionAngle=frictionAngle, density=density,
+                                   normalCohesion=cohesion,
+                                   shearCohesion=cohesion,
+                                   fragile=False))  # id 1
 
     sp = pack.SpherePack()
     sp.makeCloud(minCorner=(0, 0, 0),
@@ -105,9 +199,10 @@ def make_rve_packing(cell_size=1.0, u=None, seed=0, n_spheres=1000,
     O.engines = [
         ForceResetter(),
         InsertionSortCollider([Bo1_Sphere_Aabb()]),
-        InteractionLoop([Ig2_Sphere_Sphere_ScGeom()],
-                        [Ip2_FrictMat_FrictMat_FrictPhys()],
-                        [Law2_ScGeom_FrictPhys_CundallStrack()]),
+        InteractionLoop([Ig2_Sphere_Sphere_ScGeom6D()],
+                        [Ip2_CohFrictMat_CohFrictMat_CohFrictPhys(
+                            setCohesionOnNewContacts=False)],
+                        [Law2_ScGeom6D_CohFrictPhys_CohesionMoment()]),
         NewtonIntegrator(damping=0.85, gravity=(0, 0, 0)),
     ]
     sp.toSimulation()
@@ -153,6 +248,9 @@ def make_rve_packing(cell_size=1.0, u=None, seed=0, n_spheres=1000,
         if (nc >= 800 and ms >= 1e-4) or nc >= target_contacts + 300:
             break
     O.run(1000, True)  # settle transients (NOT a long free relaxation)
+    # T02b: bond every contact in place at the equilibrated reference state
+    # and freeze the bond topology (see establish_reference_bonds docstring)
+    bonds_info = establish_reference_bonds(verbose=verbose)
     set_reference_hsize(O.cell.hSize)
 
     v_stiff = 0.0
@@ -175,6 +273,9 @@ def make_rve_packing(cell_size=1.0, u=None, seed=0, n_spheres=1000,
         "unbalanced": unbalancedForce(),
         "E_soft": E_soft,
         "E_stiff": E_stiff,
+        "cohesion": cohesion,
+        "n_broken_bonds": count_broken_bonds(),
+        "n_bonded_after_anneal": bonds_info["n_bonded"],
     }
     if verbose:
         print("[generate] ready: bodies=%d stiff=%d vf_vol=%.3f contacts=%d "

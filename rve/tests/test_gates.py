@@ -1,27 +1,33 @@
-"""T02 gate self-test: Phase 0 G1c / G2a / G2b (DEM hyperelastic-compatibility gates).
+"""T02b gate self-test: Phase 0 G1c / G2a / G2b with BONDED contacts.
+
+Bonded variant of the T02 gates (CohFrictMat, see rve/generate.py):
+bonds are annealed to the reference state and their topology is frozen
+during probing; new contacts formed under load stay frictional.
+Bond breakage is counted against the reference bonded set only.
 
 Run from the worktree root:
     yadedaily -x rve/tests/test_gates.py
 
-Gates (dispatch for_manager/T02/dispatch.md, DOD):
- G1c hyperelastic compatibility (FrictMat, compression/shear domain only;
-     tensionless behavior is physical and NOT tested):
+Gates (dispatch for_manager/T02b/dispatch.md, DOD):
+ G1c hyperelastic compatibility (bonded, compression/shear domain only):
      - load-unload closure: compress to F=diag(0.9,1,1), unload to F=I,
        residual ||S||/E_soft < 1e-3
      - path independence: two paths to F*=[[0.9,0.05,0],[0,1,0],[0,0,1]],
        ||S_A - S_B||/||S_A|| < 5%
      - dissipation ratio: hysteresis-loop work / loading work < 10%
-       (hysteresis measures TOTAL mechanical dissipation incl. damping,
-       hence a conservative upper bound on frictional dissipation)
+       (MAIN criterion; hysteresis measures TOTAL mechanical dissipation
+       incl. damping, hence a conservative upper bound)
+     - broken bonds in the 10% domain must be 0 (else: damage ->
+       path dependence, declared in the verdict)
  G2a isotropy: uniaxial compression along x/y/z, secant-stiffness spread
-     (max-min)/mean < 10%
+     (max-min)/mean < 10%   [informational re-test]
  G2b representativeness: fixed u, >=5 seeds,
      Delta = std(||S||)/mean(||S||) <= 0.5%  (paper §1.2 definition)
+     [informational re-test; expected to exceed at 1000 spheres (T02)]
 
 Each gate prints its numbers; a summary table with GO/NO-GO is printed at
 the end. Exit code is 0 after the table (per DOD-4); verdicts live in the
-table and in for_manager/T02/w1/handoff.md. Thresholds are NOT relaxed:
-any exceedance is reported as NO-GO with the measured numbers.
+table and in for_manager/T02b/w1/handoff.md. Thresholds are NOT relaxed.
 
 2-core budget: <=1500 spheres; total runtime target ~30 min.
 """
@@ -37,7 +43,7 @@ if _WTROOT not in sys.path:
 
 from yade.minieigenHP import Matrix3
 
-from rve.generate import make_rve_packing
+from rve.generate import make_rve_packing, count_broken_bonds
 from rve.homogenize import (
     get_reference_hsize, homogenized_stress, deformation_invariants,
 )
@@ -48,7 +54,7 @@ from rve.convergence import (
 SEED = 42
 N_SPHERES = 1000
 U = {"vf": 0.2, "rMean": 0.04, "rRelFuzz": 0.3,
-     "E_soft": 1e7, "E_stiff": 5e7}
+     "E_soft": 1e7, "E_stiff": 5e7, "cohesion": 1e6}
 E_REF = U["E_soft"]          # stress normalization scale (matrix modulus)
 PROBE_KW = dict(n_increments=40, steps_per_increment=120, damping=0.7)
 UNLOAD_KW = dict(n_increments=30, steps_per_increment=80, damping=0.7)
@@ -127,16 +133,19 @@ def _incremental_work(hist):
 def gate_g1c():
     """G1c: load-unload closure, dissipation ratio, path independence."""
     print("=" * 64, flush=True)
-    print("G1c: hyperelastic compatibility (FrictMat, compression/shear)",
-          flush=True)
+    print("G1c: hyperelastic compatibility (BONDED CohFrictMat, "
+          "compression/shear)", flush=True)
     res = {}
 
     # --- 1. load-unload closure + hysteresis dissipation ---
     make_rve_packing(u=U, seed=SEED, n_spheres=N_SPHERES, verbose=False)
+    res["broken_build"] = count_broken_bonds()
     h_load = _probe_F_history(F_UNIAX, **PROBE_KW)
     S_loaded = h_load[-1]["S"]
+    res["broken_load"] = count_broken_bonds()
     h_unload = _probe_F_history(F_I, **UNLOAD_KW)
     S_res = h_unload[-1]["S"]
+    res["broken_unload"] = count_broken_bonds()
     res["residual_rel"] = frobenius_norm(S_res) / E_REF
     res["loaded_S11"] = S_loaded[0, 0]
     W_load = _incremental_work(h_load)
@@ -147,6 +156,9 @@ def gate_g1c():
     res["dissipation_ratio"] = W_diss / W_load if W_load > 0 else float("nan")
     res["closure_go"] = res["residual_rel"] < 1e-3
     res["dissipation_go"] = res["dissipation_ratio"] < 0.10
+    res["bonds_go"] = (res["broken_build"] == 0
+                       and res["broken_load"] == 0
+                       and res["broken_unload"] == 0)
     print("[G1c-1] load S11=%.3e Pa | unload residual ||S||/E=%.3e "
           "(DOD <1e-3) -> %s"
           % (res["loaded_S11"], res["residual_rel"],
@@ -155,25 +167,33 @@ def gate_g1c():
           "(DOD <0.10) -> %s"
           % (W_load, W_diss, res["dissipation_ratio"],
              "GO" if res["dissipation_go"] else "NO-GO"), flush=True)
+    print("[G1c-1] broken bonds: build=%d load=%d unload=%d (DOD 0) -> %s"
+          % (res["broken_build"], res["broken_load"], res["broken_unload"],
+             "GO" if res["bonds_go"] else "NO-GO"), flush=True)
 
     # --- 2. path independence to a combined compression+shear state ---
     F_star = Matrix3(0.9, 0.05, 0, 0, 1, 0, 0, 0, 1)
     F_mid = Matrix3(0.95, 0, 0, 0, 1, 0, 0, 0, 1)
     make_rve_packing(u=U, seed=SEED, n_spheres=N_SPHERES, verbose=False)
     S_A = _probe_F_history(F_star, **PROBE_KW)[-1]["S"]
+    res["broken_pathA"] = count_broken_bonds()
     make_rve_packing(u=U, seed=SEED, n_spheres=N_SPHERES, verbose=False)
     _probe_F_history(F_mid, n_increments=20, steps_per_increment=80,
                      damping=0.7)
     S_B = _probe_F_history(F_star, n_increments=30, steps_per_increment=120,
                            damping=0.7)[-1]["S"]
+    res["broken_pathB"] = count_broken_bonds()
     dS = S_A - S_B
     res["path_rel"] = frobenius_norm(dS) / max(frobenius_norm(S_A), 1e-30)
     res["path_go"] = res["path_rel"] < 0.05
     print("[G1c-2] path A vs B: ||S_A-S_B||/||S_A||=%.4f (DOD <0.05) -> %s"
           % (res["path_rel"], "GO" if res["path_go"] else "NO-GO"),
           flush=True)
+    print("[G1c-2] broken bonds: pathA=%d pathB=%d"
+          % (res["broken_pathA"], res["broken_pathB"]), flush=True)
 
-    res["go"] = res["closure_go"] and res["dissipation_go"] and res["path_go"]
+    res["go"] = (res["closure_go"] and res["dissipation_go"]
+                 and res["path_go"] and res["bonds_go"])
     return res
 
 
@@ -232,7 +252,8 @@ if __name__ == "__main__":
     r2a = gate_g2a()
     r2b = gate_g2b()
     print("=" * 64, flush=True)
-    print("T02 GATE SUMMARY (thresholds NOT relaxed)", flush=True)
+    print("T02b GATE SUMMARY (bonded CohFrictMat; thresholds NOT relaxed)",
+          flush=True)
     print("  G1c closure      ||S||/E=%.2e  (<1e-3)  -> %s"
           % (r1c["residual_rel"], "GO" if r1c["closure_go"] else "NO-GO"),
           flush=True)
@@ -241,6 +262,9 @@ if __name__ == "__main__":
              "GO" if r1c["dissipation_go"] else "NO-GO"), flush=True)
     print("  G1c path-indep.  rel=%.4f   (<0.05)  -> %s"
           % (r1c["path_rel"], "GO" if r1c["path_go"] else "NO-GO"), flush=True)
+    print("  G1c bonds broken build/load/unload=%d/%d/%d (DOD 0) -> %s"
+          % (r1c["broken_build"], r1c["broken_load"], r1c["broken_unload"],
+             "GO" if r1c["bonds_go"] else "NO-GO"), flush=True)
     print("  G1c OVERALL ................................ -> %s"
           % ("GO" if r1c["go"] else "NO-GO"), flush=True)
     print("  G2a isotropy     spread=%.4f (<0.10)  -> %s"

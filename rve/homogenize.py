@@ -100,10 +100,14 @@ def s_voigt(S):
 def probe_F(F_target, n_increments=50, steps_per_increment=100, damping=0.5):
     """Drive the periodic cell to deformation gradient F_target quasi-statically.
 
-    hSize is interpolated linearly from the reference to
-    hSize_target = F_target * hSize0; the packing relaxes `steps_per_increment`
-    steps (with NewtonIntegrator damping set to `damping`, restored afterwards)
-    per increment.
+    The cell path is interpolated linearly from the CURRENT hSize to
+    hSize_target = F_target * hSize0 (F is always measured against the stored
+    reference); the packing relaxes `steps_per_increment` steps (with
+    NewtonIntegrator damping set to `damping`, restored afterwards) per
+    increment. Interpolating from the current (not reference) hSize keeps
+    multi-stage paths (e.g. unload back to F=I) continuous -- the pre-T02b
+    version interpolated from the reference hSize and teleported the cell
+    on the first increment of any non-reference-start path.
 
     Returns (I1, I2, I3, S_voigt) at F_target. Requires a periodic packing in O
     and a stored reference hSize.
@@ -125,10 +129,11 @@ def probe_F(F_target, n_increments=50, steps_per_increment=100, damping=0.5):
             newton.damping = damping
         h0 = Matrix3(_reference_hsize)
         hT = F_target * h0
-        h_prev = Matrix3(O.cell.hSize)
+        h_start = Matrix3(O.cell.hSize)  # current cell (may differ from h0)
+        h_prev = Matrix3(h_start)
         for k in range(1, n_increments + 1):
             t = float(k) / n_increments
-            h = h0 * (1.0 - t) + hT * t
+            h = h_start * (1.0 - t) + hT * t
             # affine carry of particles with the cell (avoids teleporting
             # across periodic boundaries when hSize is reset directly)
             F_incr = h * h_prev.inverse()
