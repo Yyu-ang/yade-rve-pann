@@ -85,3 +85,13 @@
   从参考 hSize 插值，非参考态调用会突变；T02 用自带修正版绕过。
 - DEM 轨道后续（bonded 重测 vs 关闭为阴性结果）待用户决策；
   分析轨道 T04（PANN 训练）继续执行中，T05 待派发。
+
+## [2026-10-05 17:10 +08:00] 用户决策：bonded fallback，T02b 已派发
+
+- 用户选择做 bonded 重测（v2 计划 fallback #1）。
+- **T02b** 已派发（DISPATCHED）：worktree `.worktrees/T02b/w1`（基线 4013e51），
+  任务：① 先修 `rve/homogenize.py::probe_F` 插值 bug（从当前 hSize 插值）；
+  ② `rve/generate.py` 换 CohFrictMat（cohesion 试算定参，10% 压缩域不断键）；
+  ③ 复用门禁脚本重测 G1c（耗散比<10% 主判据）+ 断键计数；
+  ④ G2a/G2b 信息性复测（G2b 在 1000 颗粒下预期仍超标，如实报告）。
+- T04（PANN 训练）继续执行中。
