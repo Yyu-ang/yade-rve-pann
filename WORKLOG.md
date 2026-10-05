@@ -109,3 +109,17 @@
 - **T05** 已派发（DISPATCHED）：材料级 UQ demo（MC q99 + 区间优化），
   worktree `.worktrees/T05/w1`，用沙盒 checkpoint；DOD 与解析 Eq.(33) 参考对比 <3%。
 - T02b（bonded 重测）仍在执行中。
+
+## [2026-10-05 17:35 +08:00] T05 复核：HANDOFF_ACCEPTED；T04b 已派发
+
+- **T05**（材料级 UQ demo）：工作者 INCOMPLETE_HANDOFF（诚实）；管理员独立复跑
+  自测，数值逐位一致：MC mean 0.53% / std 0.33% / q99 0.81% ✓；
+  区间 min 1.49% ✓；区间 max 5.56% ✗（DOD<3%）。
+- **根因确认**（管理员独立验证）：T04 代理四角点误差 -1.49%/-0.89%/-2.39%/-5.56%，
+  在 (E=3.5e4, ν=0.39) 系统性低估；κ=E/(3(1−2ν)) 在 ν→0.39 处陡峭约 7×，
+  均匀 LHS 欠采样边界。T05 方法链本身正确（CRN、DE 交叉、多起点均验证过）。
+- **裁决 HANDOFF_ACCEPTED**：不返工 T05（非其过错），不放宽 DOD；
+  派发 **T04b**（DISPATCHED）：边界加权再训练，worktree `.worktrees/T04b/w1`，
+  DOD：测试 L2<5% 无回归 + 四角点<3% + T05 区间 max 重验<3%；
+  若仍超标则如实记录局限。
+- T02b（bonded 重测）仍在执行中。
