@@ -1,6 +1,7 @@
-__pycache__/
-*.pyc
-data/*.npz
-data/*.h5
 *.log
+*.pyc
 .ipynb_checkpoints/
+.venv/
+__pycache__/
+data/*.h5
+data/*.npz
