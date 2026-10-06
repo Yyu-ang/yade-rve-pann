@@ -99,11 +99,13 @@ CohFrictMat both fail the hyperelastic gate G1c (dissipation 25%/16% > 10%;
 representativeness Δ=4.9%/3.6% > 0.5%) — finite-strain contact-topology
 hysteresis is intrinsic to DEM. Evidence: `docs/method_notes.md`.
 
-**Phase 1B — macro BVP (Example I) reproduction: in progress.**
-2D plane-stress plate-with-hole solver + KL random fields done;
-macro UQ pilot: PANN vs reference q99 rel. err −0.15%/+0.13%
-(paper: 0.1%/0.07%), p-boxes nearly overlapping.
-Full run (paper MC rule, fine mesh) underway → `figures/T08/`.
+**Phase 1B — macro BVP (Example I) reproduction: pilot complete, full run underway.**
+2D plane-stress plate-with-hole solver + KL random fields done.
+Macro UQ pilot: PANN vs reference q99 rel. err −0.15%/−0.043%/+0.13%
+(paper: 0.1%/0.07%), p-boxes nearly overlapping, q99 monotonic in μ_E^i
+(optima at interval bounds, as in the paper).
+Full run (paper MC rule: 1e4 + 2e3 redraws until q99 stable <0.5% over 5 steps):
+run 1/4 done — μ=2.8e4 reference, N=22000, q99=7937.53 MPa, 0 failures.
 
 Figure/table ledger: `docs/figure_table_inventory.md`.
 Reproduction plan (v2, current): `docs/reproduction_plan_review_2026-10-05.md`.
