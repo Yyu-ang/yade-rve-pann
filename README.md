@@ -76,6 +76,18 @@ yadedaily -x sampling/domain_separation.py
 # 5. Macro BVP + UQ (Example I, Fig. 6/7 analogues) — macro/, see for_manager/T08
 ```
 
+## Results
+
+**Fig. 6 analogue** — plate with hole (8×8 m, r = 2 m), principal stress field
+for an exemplary realization (2D plane-stress analogue of the paper's 3D FEAP model):
+
+![Fig. 6 analogue](figures/T06/fig6_analog.png)
+
+**Fig. 7 analogue (pilot)** — p-box of σ_char, PANN-based vs reference solution;
+q99 relative errors −0.15% / +0.13% (paper: 0.1% / 0.07%):
+
+![Fig. 7 analogue, pilot](figures/T08/fig7_analog_pilot.png)
+
 ## Status (2026-10-06)
 
 **Phase 1A — analytical track: complete.** Exact Eq.(33) implementation
