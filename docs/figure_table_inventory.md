@@ -13,10 +13,10 @@
 | Fig. 3 | FE2 vs PANN 流程图 | schematic | — | 豁免 | 无数据可复现 |
 | Fig. 4 | 域分离示意图 | schematic | Phase 3 | 参考 | 实现域分离采样时的设计参照 |
 | Fig. 5 | 算法流程图 | schematic | — | 豁免 | 无数据可复现 |
-| Fig. 6 | plate-with-hole 几何 + 主应力场（示例 realization） | 几何数据 + 结果图 | Phase 1B | **待复现** | 几何可直接重建；应力场需宏观求解器（G6） |
+| Fig. 6 | plate-with-hole 几何 + 主应力场（示例 realization） | 几何数据 + 结果图 | T06（已完成） | ✅ analogue 已复现 | `figures/T06/fig6_analog.png`（2D 平面应力 analogue；形态与论文一致，应力集中在孔左右；绝对值差异源于示例取 v=0.69 m 中位值，见 T06 review） |
 | Table 1 | Ex.I DoE 边界（E iprf / ν rf） | 数据表 | T04（已完成） | ✅ 已复现 | `figures/T04/table1_doe_bounds.csv` |
 | Table 2 | Ex.I PANN 结构（5→175→175→1） | 数据表 | T04（已完成） | ✅ 已复现 | `figures/T04/table2_pann_arch.csv` |
-| Fig. 7 | Ex.I p-box（σ_char，PANN vs 参考，q99 误差 0.1%/0.07%） | 结果图 | Phase 1B（G6） | **待复现** | 需宏观 BVP + 随机场（KL）+ Eq.(32) QoI + 区间 ES；**T05 材料点 demo 不是此图** |
+| Fig. 7 | Ex.I p-box（σ_char，PANN vs 参考，q99 误差 0.1%/0.07%） | 结果图 | T08（pilot 完成，全量在跑） | **pilot 已出图** | `figures/T08/fig7_analog_pilot.png`（2D analogue；pilot：q99 相对误差 −0.15%/+0.13%，p-box 几乎重合）；全量（细网格+完整 MC 规则）完成后出终版 |
 | Fig. 8 | Ex.II FE 模型 | schematic/mesh | — | 豁免 | FEM-specific |
 | Table 3 | Ex.II 参数表 | 数据表 | — | 范围外 | 需 FEM RVE；DEM 轨道已关闭 |
 | Fig. 9 | RVE 结构 + 不确定性 | 结果图 | Phase 2 | 已关闭 | DEM 轨道记为阴性结果关闭；FEM 不可用 |
