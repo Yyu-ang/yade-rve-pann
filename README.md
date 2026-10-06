@@ -40,8 +40,9 @@ paper's workflow intact:
 - PANN surrogate Ψ(**I**, **u**) with stress via autodiff (§4.2.1)
 - MC / interval / p-box UQ (§3)
 
-DEM packings are the mesostructure; the surrogate/UQ layers are
-microscale-agnostic, exactly as argued in §4.2 of the paper.
+DEM packings were explored as the mesostructure; the DEM energy-PANN route is
+documented as a negative result (Phase 0 gates failed, see Status).
+The surrogate/UQ layers are implemented against the analytical reference.
 
 ## Layout
 
@@ -63,20 +64,34 @@ data/         generated RVE datasets (not versioned if large)
 ## Quick start
 
 ```bash
-# 1. RVE convergence study (paper §4.1, Fig. 10 analog)
-yadedaily -x rve/convergence.py
-# 2. Domain-separated data generation (paper §4.2.2, Fig. 4)
+# 1. RVE gate tests (paper §4.1): G1a/G1b mapping checks are fast;
+#    full G1c/G2 DEM gates take a while (1000-particle packings)
+yadedaily -x rve/tests/test_gates.py
+# 2. Domain-separated sampling demo (paper §4.2.2, Fig. 4)
 yadedaily -x sampling/domain_separation.py
-# 3. Train PANN surrogate (paper §4.2.1)
-python3 surrogate/train_pann.py
-# 4. Polymorphic UQ demo (paper §3–§4)
-python3 uq/run_uq.py
+# 3. PANN training (paper §4.2.1; full 2000-epoch run)
+~/workspace/venvs/rve-pann/bin/python surrogate/train_pann.py
+# 4. Material-point UQ demo (paper §3–§4 method chain)
+~/workspace/venvs/rve-pann/bin/python uq/material_uq.py
+# 5. Macro BVP + UQ (Example I, Fig. 6/7 analogues) — macro/, see for_manager/T08
 ```
 
-## Status
+## Status (2026-10-06)
 
-- [x] RVE periodic homogenization smoke-tested in YADE
-- [ ] Convergence study implementation
-- [ ] Domain-separated sampler
-- [ ] PANN training pipeline
-- [ ] UQ (MC / interval / p-box) + Example-I validation
+**Phase 1A — analytical track: complete.** Exact Eq.(33) implementation
+(S=2∂Ψ/∂C err 1.4e-08); PANN 5→175→175→1, test stress rel. L2 = 0.45%;
+material-point UQ demo (MC q99 err 0.55%, interval bounds <1.2%).
+
+**Phase 0 — DEM track: closed as negative result.** FrictMat and bonded
+CohFrictMat both fail the hyperelastic gate G1c (dissipation 25%/16% > 10%;
+representativeness Δ=4.9%/3.6% > 0.5%) — finite-strain contact-topology
+hysteresis is intrinsic to DEM. Evidence: `docs/method_notes.md`.
+
+**Phase 1B — macro BVP (Example I) reproduction: in progress.**
+2D plane-stress plate-with-hole solver + KL random fields done;
+macro UQ pilot: PANN vs reference q99 rel. err −0.15%/+0.13%
+(paper: 0.1%/0.07%), p-boxes nearly overlapping.
+Full run (paper MC rule, fine mesh) underway → `figures/T08/`.
+
+Figure/table ledger: `docs/figure_table_inventory.md`.
+Reproduction plan (v2, current): `docs/reproduction_plan_review_2026-10-05.md`.
