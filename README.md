@@ -88,6 +88,38 @@ q99 relative errors −0.15% / +0.13% (paper: 0.1% / 0.07%):
 
 ![Fig. 7 analogue, pilot](figures/T08/fig7_analog_pilot.png)
 
+**Fig. 7 analogue (full run, interim)** — lower bound (μ_E^i = 2.8e4 MPa):
+ECDF of σ_char, reference (N=22000, converged) vs PANN (N=11000, still converging);
+q99 = 7937.53 vs 7889.63 MPa, rel. err −0.60%:
+
+![Fig. 7 analogue, full-run lower bound interim](figures/T08/fig7_lower_bound_interim.png)
+
+### Key numbers
+
+| Quantity | Paper | This repo | Status |
+|---|---|---|---|
+| T04b test stress rel. L2 | <5% (DOD) | 0.4516% | ✅ |
+| T05 material-point q99 rel. err | — | 0.5513% | ✅ |
+| Fig. 7 pilot q99 rel. err (2 bounds) | 0.1% / 0.07% | −0.15% / +0.13% | ✅ |
+| Fig. 7 full run, lower bound q99 | — | −0.60% (interim) | 🔄 converging |
+
+### Table 1 — Example I DoE bounds (reproduced value-by-value)
+
+| Parameter | Paper | This repo | Match |
+|---|---|---|---|
+| E_iprf [MPa] | [2.5e4, 3.5e4] | [2.5e4, 3.5e4] | ✅ |
+| ν_rf | [0.21, 0.39] | [0.21, 0.39] | ✅ |
+| U samples × F per U | 50 × 100 | 50 × 100 | ✅ |
+
+### Table 2 — Example I PANN architecture (reproduced value-by-value)
+
+| Layer | Paper | This repo | Match |
+|---|---|---|---|
+| Input | 5, softplus | 5, softplus | ✅ |
+| Hidden 1 | 175, softplus | 175, softplus | ✅ |
+| Hidden 2 | 175, softplus | 175, softplus | ✅ |
+| Output | 1, linear | 1, linear | ✅ |
+
 ## Status (2026-10-06)
 
 **Phase 1A — analytical track: complete.** Exact Eq.(33) implementation
@@ -106,8 +138,8 @@ Macro UQ pilot: PANN vs reference q99 rel. err −0.15%/−0.043%/+0.13%
 (optima at interval bounds, as in the paper).
 Full run (paper MC rule: 1e4 + 2e3 redraws until q99 stable <0.5% over 5 steps):
 run 1/4 done — μ=2.8e4 reference, N=22000, q99=7937.53 MPa, 0 failures.
-run 2/4 running — μ=2.8e4 PANN, first batch N=10000, q99=7875.04 MPa
-(−0.79% vs reference, within the 2% gate; converging further).
+run 2/4 running — μ=2.8e4 PANN, N=11000, q99=7889.63 MPa
+(−0.60% vs reference, within the 2% gate; converging further).
 
 Figure/table ledger: `docs/figure_table_inventory.md`.
 Reproduction plan (v2, current): `docs/reproduction_plan_review_2026-10-05.md`.
