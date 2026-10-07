@@ -60,12 +60,16 @@ def plate_bcs(mesh, v_target):
 
 
 def solve(mesh, E, nu, v_target=0.0, n_steps=8, tol=1e-8, maxit=12,
-          verbose=False, fix_dofs=None, ramp_dofs=None, ramp_final=None):
+          verbose=False, fix_dofs=None, ramp_dofs=None, ramp_final=None,
+          condense_fn=None):
     """Solve the 2D plane-stress problem.
 
     BCs: bottom edge u=(0,0); top edge uz=-v (ramped), ux free -- unless
     overridden by fix_dofs / ramp_dofs / ramp_final (for patch tests).
     E, nu: scalar or (M,) per-element arrays [E in MPa].
+    condense_fn: optional plane-stress constitutive with the same signature
+        as ``plane_stress.condense`` ``(F2, E, nu, lam0) -> (S2, C2, lam)``
+        (T08: PANN coupling replaces the constitutive at this single point).
 
     Returns dict with U (N,2), per-element/nodal stresses, QoI, Newton counts.
     """
@@ -73,6 +77,8 @@ def solve(mesh, E, nu, v_target=0.0, n_steps=8, tol=1e-8, maxit=12,
     N, M = coords.shape[0], tris.shape[0]
     area, dNdx, dNdz = tri_areas_and_grads(coords, tris)
     B = _b_matrices(dNdx, dNdz)
+    if condense_fn is None:
+        condense_fn = ps.condense
 
     E_arr = np.full(M, E) if np.ndim(E) == 0 else np.asarray(E, float)
     nu_arr = np.full(M, nu) if np.ndim(nu) == 0 else np.asarray(nu, float)
@@ -115,7 +121,7 @@ def solve(mesh, E, nu, v_target=0.0, n_steps=8, tol=1e-8, maxit=12,
         J2 = F2[:, 0, 0] * F2[:, 1, 1] - F2[:, 0, 1] * F2[:, 1, 0]
         if np.any(J2 <= 1e-12):
             raise _InvalidState("element inversion")
-        S2, C2, lam_new = ps.condense(F2, E_arr, nu_arr, lam0=lam)
+        S2, C2, lam_new = condense_fn(F2, E_arr, nu_arr, lam0=lam)
         P2 = ps.first_piola_2d(F2, S2)                 # (M,2,2)
         Pv = np.stack([P2[:, a, b] for (a, b) in _VOIGT], axis=1)  # (M,4)
         D = ps.tangent_P(F2, S2, C2)                   # (M,2,2,2,2)
@@ -138,10 +144,14 @@ def solve(mesh, E, nu, v_target=0.0, n_steps=8, tol=1e-8, maxit=12,
     dt = 1.0 / n_steps
     U_conv = U.copy()
     lam_conv = lam.copy()
+    U_prev = None          # for linear-extrapolation warm start (T08)
     step_count = 0
     while t < 1.0 - 1e-12:
         t_try = min(t + dt, 1.0)
         U_try = U_conv.copy()
+        if U_prev is not None:
+            # linear extrapolation of the free-DOF increment (T08)
+            U_try[free] = U_conv[free] + (U_conv[free] - U_prev[free])
         U_try[ramp_dofs] = ramp_final * t_try
         try:
             st = state_at(U_try)
@@ -192,6 +202,7 @@ def solve(mesh, E, nu, v_target=0.0, n_steps=8, tol=1e-8, maxit=12,
             continue
         # step accepted
         t = t_try
+        U_prev = U_conv.copy()
         U_conv = U.copy()
         lam_conv = lam.copy()
         step_count += 1
