@@ -106,6 +106,8 @@ Macro UQ pilot: PANN vs reference q99 rel. err −0.15%/−0.043%/+0.13%
 (optima at interval bounds, as in the paper).
 Full run (paper MC rule: 1e4 + 2e3 redraws until q99 stable <0.5% over 5 steps):
 run 1/4 done — μ=2.8e4 reference, N=22000, q99=7937.53 MPa, 0 failures.
+run 2/4 running — μ=2.8e4 PANN, first batch N=10000, q99=7875.04 MPa
+(−0.79% vs reference, within the 2% gate; converging further).
 
 Figure/table ledger: `docs/figure_table_inventory.md`.
 Reproduction plan (v2, current): `docs/reproduction_plan_review_2026-10-05.md`.
