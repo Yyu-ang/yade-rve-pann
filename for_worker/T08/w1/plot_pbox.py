@@ -23,7 +23,8 @@ FIGDIR = os.path.join(ROOT, "figures", "T08")
 
 def load_npz(tag, workdir):
     d = np.load(os.path.join(workdir, f"{tag}.npz"), allow_pickle=True)
-    return d["sigma_char"], float(d["q99"]), float(d["mu"])
+    q99 = np.atleast_1d(d["q99"])[-1]  # full runs store the q_hist array
+    return d["sigma_char"], float(q99), float(d["mu"])
 
 
 def pbox_data(workdir, prefix, mus):

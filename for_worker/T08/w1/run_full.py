@@ -8,8 +8,13 @@
 - MC rule (paper, literal): N0=1e4, then +2e3 until q99 changes < 0.5%
   within last 5 steps. Common RNG across all 4 runs.
 - Incremental checkpointing per batch PLUS intra-batch every INTRA_CKPT
-  samples (VM-restart hardening, method-neutral: batch boundaries and the
-  N0-first-batch paper rule are unchanged); 2 worker processes.
+  samples (VM-restart hardening); 2 worker processes.
+- Resume semantics (paper-literal): q99 is evaluated ONLY at canonical
+  batch boundaries N0, N0+DN, ...  On resume the stored q99_hist is
+  rebuilt from those sample prefixes (_canonical_q_hist) and the next
+  batch runs to the next canonical boundary (_next_target), so restarts
+  can no longer drift evaluation points off the paper rule.  Samples and
+  their order are untouched (method-neutral).
 
 Run:  python for_worker/T08/w1/run_full.py   (from worktree root, background)
 """
@@ -42,6 +47,40 @@ OUTDIR = os.path.join(ROOT, "for_worker", "T08", "w1")
 INTRA_CKPT = 500
 
 _G = {}
+
+
+def _next_target(n_done):
+    """Next canonical batch boundary strictly above n_done.
+
+    Canonical boundaries are N0, N0+DN, N0+2*DN, ... (paper MC rule).
+    The first batch is always exactly N0 samples, even when resuming
+    from an intra-batch checkpoint (0 < n_done < N0).  Resuming mid-batch
+    later (e.g. n_done=12500) continues to the next canonical boundary
+    (14000), NOT n_done+DN (14500) -- otherwise q99 evaluation points
+    drift off the paper rule after every restart.
+    """
+    if n_done < N0:
+        return N0
+    k = (n_done - N0 + DN) // DN  # smallest k with N0+k*DN > n_done
+    return N0 + k * DN
+
+
+def _canonical_q_hist(arr):
+    """Rebuild the q99 history on canonical batch boundaries.
+
+    Called on resume: past VM restarts may have cut batches at
+    non-canonical N, so the stored q99_hist is discarded and rebuilt
+    from the sample prefixes N0, N0+DN, ... <= len(arr).  The paper
+    stopping rule is then always evaluated at canonical points.
+    Method-neutral: samples and their order are untouched.
+    """
+    qh = []
+    N = N0
+    while N <= len(arr):
+        sub = arr[:N]
+        qh.append(float(np.quantile(sub[np.isfinite(sub)], 0.99)))
+        N += DN
+    return qh
 
 
 def _init(ckpt_path, mesh_dict, streams, e_mean, centroids):
@@ -101,20 +140,23 @@ def run_full(mu, constitutive, ckpt_path, mesh, streams, centroids):
     if os.path.exists(ckpt_file):
         d = np.load(ckpt_file, allow_pickle=True)
         sc_list = [d["sigma_char"]]
-        q_hist = list(d["q99_hist"])
         n_fail, n_fallback = int(d["n_fail"]), int(d["n_fallback"])
         n_done = len(sc_list[0])
-        print(f"[full] {tag}: resuming at N={n_done}", flush=True)
+        # Rebuild q_hist on canonical boundaries (see _canonical_q_hist):
+        # a restart may have cut the previous batch at non-canonical N.
+        q_hist = _canonical_q_hist(sc_list[0])
+        print(f"[full] {tag}: resuming at N={n_done}, "
+              f"canonical q_hist len={len(q_hist)}", flush=True)
     print(f"[full] {tag}: MC start (N0={N0}, dN={DN}) ...", flush=True)
     t0 = time.time()
     with ProcessPoolExecutor(max_workers=2, initializer=_init,
                              initargs=(ckpt_path, mesh, streams, mu,
                                        centroids)) as ex:
         while True:
-            # Paper rule: the FIRST batch is exactly N0 samples, even when
-            # resuming from an intra-batch checkpoint (0 < n_done < N0).
-            n_target = N0 if n_done < N0 else n_done + DN
-            n_target = min(n_target, N_CAP)
+            # Canonical batch boundaries (paper rule); see _next_target.
+            # The FIRST batch is exactly N0 samples, even when resuming
+            # from an intra-batch checkpoint (0 < n_done < N0).
+            n_target = min(_next_target(n_done), N_CAP)
             idx = [(i, constitutive) for i in range(n_done, n_target)]
             batch = np.full(len(idx), np.nan)
             n_in_batch = 0
